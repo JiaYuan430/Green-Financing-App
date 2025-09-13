@@ -71,6 +71,7 @@ with menu[1]:
     investment = st.number_input("💰 Initial Investment (RM)", min_value=1000, value=50000, step=1000)
 
     # ---------------- Default Monthly Savings ----------------
+# ---------------- Default Monthly Savings ----------------
 if category == "Solar":
     # Ask user for house type
     house_type = st.selectbox("Select Your House Type", ["Terrace House", "Semi-detached", "Bungalow"])
@@ -85,15 +86,16 @@ if category == "Solar":
     system_size = house_solar_system[house_type]
 
     # Estimate monthly savings based on state average + system size
-    # Assume average system size across keys = 7.5 kWp (for scaling)
     average_system_size = 7.5
     annual_saving = solar_data[state]  # yearly RM saving per state
     monthly_savings_default = int((annual_saving * (system_size / average_system_size)) / 12)
 
-    elif category == "Water":
-        monthly_savings_default = water_data[state]  # average monthly bill as default
-    else:
-        monthly_savings_default = 1000  # fallback for other categories
+elif category == "Water":
+    monthly_savings_default = water_data[state]  # average monthly bill as default
+
+else:
+    monthly_savings_default = 1000  # fallback for other categories
+
 
     monthly_savings = st.number_input(
         "⚡ Monthly Savings (RM)", 
@@ -261,4 +263,5 @@ if category == "Solar":
             # Build PDF
             doc.build(elements)
             st.download_button("Download PDF", data=buffer.getvalue(), file_name=f"roi_report_{state}_{category}.pdf", mime="application/pdf")
+
 
