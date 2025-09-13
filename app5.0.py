@@ -49,7 +49,7 @@ with menu[1]:
 
     # Category selection
     categories = ["Solar", "Water", "Waste Management", "Energy Efficiency", "Other"]
-    category = st.selectbox("📂 Select Investment Category", categories)
+    category = st.selectbox("Select Investment Category", categories)
 
     # User inputs
     investment = st.number_input("💰 Initial Investment (RM)", min_value=1000, value=50000, step=1000)
@@ -112,9 +112,11 @@ with menu[1]:
         ax3.bar(roi_values.keys(), roi_values.values(), color="skyblue")
         ax3.set_ylabel("ROI (%)")
         ax3.set_title("ROI Benchmark Across Categories")
+        ax3.set_xticklabels(ax3.get_xticklabels(), rotation=20, ha="right")
+        plt.tight_layout()
         st.pyplot(fig3)
 
-    # Export options
+    # ---------------- Export options ----------------
     st.subheader("📤 Export Report")
     export_format = st.selectbox("Choose format", ["CSV", "PDF"])
 
@@ -185,36 +187,7 @@ with menu[1]:
             elements.append(table_yearly)
             elements.append(Spacer(1, 12))
 
-            # ROI summary
-            roi_summary_text = f"Payback achieved in ~{payback_years:.1f} years"
-            roi_summary_table = Table([[Paragraph(f"<b>{roi_summary_text}</b>", styles['Normal'])]], colWidths=[300])
-            roi_summary_table.setStyle(TableStyle([
-                ('BACKGROUND', (0, 0), (-1, -1), colors.lightgreen),
-                ('BOX', (0, 0), (-1, -1), 1, colors.green),
-                ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-                ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-            ]))
-            roi_summary_wrapper = Table([[roi_summary_table]], colWidths=[450])
-            roi_summary_wrapper.setStyle(TableStyle([('ALIGN', (0, 0), (-1, -1), 'CENTER')]))
-            elements.append(roi_summary_wrapper)
-            elements.append(Spacer(1, 6))
-
-            # Final ROI
-            roi_final = ((df_yearly["Yearly Cumulative Savings"].iloc[-1] - investment) / investment) * 100
-            roi_final_text = f"Final ROI after {years} years: {roi_final:.2f}%"
-            roi_final_table = Table([[Paragraph(f"<b>{roi_final_text}</b>", styles['Normal'])]], colWidths=[300])
-            roi_final_table.setStyle(TableStyle([
-                ('BACKGROUND', (0, 0), (-1, -1), colors.lightgreen),
-                ('BOX', (0, 0), (-1, -1), 1, colors.green),
-                ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-                ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-            ]))
-            roi_final_wrapper = Table([[roi_final_table]], colWidths=[450])
-            roi_final_wrapper.setStyle(TableStyle([('ALIGN', (0, 0), (-1, -1), 'CENTER')]))
-            elements.append(roi_final_wrapper)
-            elements.append(Spacer(1, 12))
-
-            # --- Charts (only if they exist) ---
+            # Add charts if selected
             if "Cumulative Savings Over Time" in selected_charts and "fig1" in locals():
                 img_buffer1 = BytesIO()
                 fig1.savefig(img_buffer1, format="png")
