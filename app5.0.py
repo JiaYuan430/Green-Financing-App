@@ -129,47 +129,38 @@ with menu[1]:
     months = np.arange(1, years * 12 + 1)
     savings = np.cumsum(np.random.normal(monthly_savings, monthly_savings * 0.1, years * 12))
 
+
     # --- Chart selection ---
     st.subheader("📊 Visualization Options")
-    chart_options = ["Cumulative Savings Over Time", "Investment vs. Total Savings", "ROI Benchmark by Category"]
+    chart_options = ["Cumulative Savings Over Time", "Investment vs. Total Savings"]
     selected_charts = st.multiselect("Select chart(s) to display", chart_options)
 
-    if "Cumulative Savings Over Time" in selected_charts:
-        st.markdown("### 📈 Cumulative Savings Over Time")
-        fig1, ax1 = plt.subplots(figsize=(8, 4))
-        ax1.plot(months, savings, label="Cumulative Savings", color="green")
-        ax1.axhline(y=investment, color="red", linestyle="--", label="Initial Investment")
-        ax1.axvline(x=payback_months, color="blue", linestyle="--", label="Payback Period")
-        ax1.set_xlabel("Months")
-        ax1.set_ylabel("RM")
-        ax1.set_title("Monthly Cumulative Electricity Savings")
-        ax1.legend()
-        st.pyplot(fig1)
+    if "Cumulative Savings Over Time" in selected_charts or "Investment vs. Total Savings" in selected_charts:
+        # Use columns for side-by-side layout
+        col1, col2 = st.columns(2)
 
-    if "Investment vs. Total Savings" in selected_charts:
-        st.markdown("### 📊 Investment vs. Total Savings")
-        fig2, ax2 = plt.subplots(figsize=(6, 4))
-        ax2.bar(["Initial Investment", f"Savings ({years} yrs)"], [investment, total_savings], color=["red", "green"])
-        ax2.set_ylabel("RM")
-        ax2.set_title("Comparison of Investment vs. Total Savings")
-        st.pyplot(fig2)
+        if "Cumulative Savings Over Time" in selected_charts:
+            with col1:
+                st.markdown(f"### 📈 Cumulative Savings Over Time ({state} - {category})")
+                fig1, ax1 = plt.subplots(figsize=(6, 4))
+                ax1.plot(months, savings, label="Cumulative Savings", color="green")
+                ax1.axhline(y=investment, color="red", linestyle="--", label="Initial Investment")
+                if monthly_savings > 0 and payback_months <= years * 12:
+                    ax1.axvline(x=payback_months, color="blue", linestyle="--", label="Payback Period")
+                ax1.set_xlabel("Months")
+                ax1.set_ylabel("RM")
+                ax1.set_title(f"Monthly Cumulative Savings in {state} for {category}")
+                ax1.legend()
+                st.pyplot(fig1)
 
-    if "ROI Benchmark by Category" in selected_charts:
-        st.markdown("### 📊 ROI Benchmark by Category")
-        roi_values = {
-            "Solar": ((monthly_savings*12*years - investment)/investment)*100,
-            "Water": ((monthly_savings*12*years*0.9 - investment)/investment)*100,
-            "Waste Management": ((monthly_savings*12*years*1.1 - investment)/investment)*100,
-            "Energy Efficiency": ((monthly_savings*12*years*1.05 - investment)/investment)*100,
-            "Other": ((monthly_savings*12*years*0.95 - investment)/investment)*100
-        }
-        fig3, ax3 = plt.subplots(figsize=(7,4))
-        ax3.bar(roi_values.keys(), roi_values.values(), color="skyblue")
-        ax3.set_ylabel("ROI (%)")
-        ax3.set_title("ROI Benchmark Across Categories")
-        ax3.set_xticklabels(ax3.get_xticklabels(), rotation=20, ha="right")
-        plt.tight_layout()
-        st.pyplot(fig3)
+        if "Investment vs. Total Savings" in selected_charts:
+            with col2:
+                st.markdown(f"### 📊 Investment vs. Total Savings ({state} - {category})")
+                fig2, ax2 = plt.subplots(figsize=(6, 4))
+                ax2.bar(["Initial Investment", f"Savings ({years} yrs)"], [investment, total_savings], color=["red", "green"])
+                ax2.set_ylabel("RM")
+                ax2.set_title(f"Investment vs. Total Savings in {state} for {category}")
+                st.pyplot(fig2)
 
     # ---------------- Export options ----------------
     st.subheader("📤 Export Report")
@@ -185,10 +176,10 @@ with menu[1]:
 
         if export_format == "CSV":
             csv_monthly = df_monthly.to_csv(index=False).encode("utf-8")
-            st.download_button("Download Monthly CSV", data=csv_monthly, file_name="roi_monthly.csv", mime="text/csv")
+            st.download_button("Download Monthly CSV", data=csv_monthly, file_name=f"roi_monthly_{state}_{category}.csv", mime="text/csv")
 
             csv_yearly = df_yearly.to_csv(index=False).encode("utf-8")
-            st.download_button("Download Yearly CSV", data=csv_yearly, file_name="roi_yearly.csv", mime="text/csv")
+            st.download_button("Download Yearly CSV", data=csv_yearly, file_name=f"roi_yearly_{state}_{category}.csv", mime="text/csv")
 
         elif export_format == "PDF":
             buffer = BytesIO()
@@ -199,6 +190,7 @@ with menu[1]:
             # Report text
             elements.append(Paragraph("ROI Report - Green Investment", styles['Title']))
             elements.append(Spacer(1, 12))
+            elements.append(Paragraph(f"State: {state}", styles['Normal']))
             elements.append(Paragraph(f"Category: {category}", styles['Normal']))
             elements.append(Paragraph(f"Initial Investment: RM {investment:,.2f}", styles['Normal']))
             elements.append(Paragraph(f"Total Savings: RM {total_savings:,.2f}", styles['Normal']))
@@ -242,9 +234,9 @@ with menu[1]:
             elements.append(table_yearly)
             elements.append(Spacer(1, 12))
 
-            # ROI summary
-            roi_summary_text = f"Payback achieved in ~{payback_years:.1f} years"
-            roi_summary_table = Table([[Paragraph(f"<b>{roi_summary_text}</b>", styles['Normal'])]], colWidths=[300])
+            # ---------------- ROI Summary ----------------
+            roi_summary_text = f"State: {state} | Category: {category} | Payback achieved in ~{payback_years:.1f} years"
+            roi_summary_table = Table([[Paragraph(f"<b>{roi_summary_text}</b>", styles['Normal'])]], colWidths=[400])
             roi_summary_table.setStyle(TableStyle([
                 ('BACKGROUND', (0, 0), (-1, -1), colors.lightgreen),
                 ('BOX', (0, 0), (-1, -1), 1, colors.green),
@@ -254,28 +246,14 @@ with menu[1]:
             roi_summary_wrapper = Table([[roi_summary_table]], colWidths=[450])
             roi_summary_wrapper.setStyle(TableStyle([('ALIGN', (0, 0), (-1, -1), 'CENTER')]))
             elements.append(roi_summary_wrapper)
-            elements.append(Spacer(1, 6))
-
-            # Final ROI
-            roi_final = ((df_yearly["Yearly Cumulative Savings"].iloc[-1] - investment) / investment) * 100
-            roi_final_text = f"Final ROI after {years} years: {roi_final:.2f}%"
-            roi_final_table = Table([[Paragraph(f"<b>{roi_final_text}</b>", styles['Normal'])]], colWidths=[300])
-            roi_final_table.setStyle(TableStyle([
-                ('BACKGROUND', (0, 0), (-1, -1), colors.lightgreen),
-                ('BOX', (0, 0), (-1, -1), 1, colors.green),
-                ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-                ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-            ]))
-            roi_final_wrapper = Table([[roi_final_table]], colWidths=[450])
-            roi_final_wrapper.setStyle(TableStyle([('ALIGN', (0, 0), (-1, -1), 'CENTER')]))
-            elements.append(roi_final_wrapper)
             elements.append(Spacer(1, 12))
 
-            # Add charts if selected
+            # Add charts with state & category info
             if "Cumulative Savings Over Time" in selected_charts and "fig1" in locals():
                 img_buffer1 = BytesIO()
                 fig1.savefig(img_buffer1, format="png")
                 img_buffer1.seek(0)
+                elements.append(Paragraph(f"Cumulative Savings Over Time ({state} - {category})", styles['Heading3']))
                 elements.append(Image(img_buffer1, width=400, height=200))
                 elements.append(Spacer(1, 12))
 
@@ -283,16 +261,10 @@ with menu[1]:
                 img_buffer2 = BytesIO()
                 fig2.savefig(img_buffer2, format="png")
                 img_buffer2.seek(0)
+                elements.append(Paragraph(f"Investment vs. Total Savings ({state} - {category})", styles['Heading3']))
                 elements.append(Image(img_buffer2, width=400, height=200))
                 elements.append(Spacer(1, 12))
 
-            if "ROI Benchmark by Category" in selected_charts and "fig3" in locals():
-                img_buffer3 = BytesIO()
-                fig3.savefig(img_buffer3, format="png")
-                img_buffer3.seek(0)
-                elements.append(Image(img_buffer3, width=400, height=200))
-
             # Build PDF
             doc.build(elements)
-            st.download_button("Download PDF", data=buffer.getvalue(), file_name="roi_report.pdf", mime="application/pdf")
-
+            st.download_button("Download PDF", data=buffer.getvalue(), file_name=f"roi_report_{state}_{category}.pdf", mime="application/pdf")
