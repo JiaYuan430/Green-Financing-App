@@ -70,38 +70,19 @@ with menu[1]:
     # User inputs
     investment = st.number_input("💰 Initial Investment (RM)", min_value=1000, value=50000, step=1000)
 
-    # ---------------- Default Monthly Savings ----------------
-# ---------------- Default Monthly Savings ----------------
-if category == "Solar":
-    # Ask user for house type
-    house_type = st.selectbox("Select Your House Type", ["Terrace House", "Semi-detached", "Bungalow"])
-    
-    # Map house type to typical system capacity (kWp)
-    house_solar_system = {
-        "Terrace House": 5,      # avg 4–6 kWp
-        "Semi-detached": 7.5,    # avg 6–9 kWp
-        "Bungalow": 11           # avg 9–13 kWp
-    }
-
-    system_size = house_solar_system[house_type]
-
-    # Estimate monthly savings based on state average + system size
-    average_system_size = 7.5
-    annual_saving = solar_data[state]  # yearly RM saving per state
-    monthly_savings_default = int((annual_saving * (system_size / average_system_size)) / 12)
-
-elif category == "Water":
-    monthly_savings_default = water_data[state]  # average monthly bill as default
-
-else:
-    monthly_savings_default = 1000  # fallback for other categories
-
+    # Default monthly savings based on state and category
+    if category == "Solar":
+        monthly_savings_default = solar_data[state] / 12  # convert yearly mean to monthly
+    elif category == "Water":
+        monthly_savings_default = water_data[state]  # average monthly bill as default
+    else:
+        monthly_savings_default = 1000  # fallback for other categories
 
     monthly_savings = st.number_input(
         "⚡ Monthly Savings (RM)", 
-        min_value=50,  # lower min_value to prevent errors
+        min_value=1,  # changed from 100 to 1 to prevent error
         value=int(monthly_savings_default), 
-        step=50
+        step=100
     )
 
     years = st.slider("⏳ Investment Horizon (Years)", 1, 10, 5)
@@ -123,7 +104,6 @@ else:
     # Data for charts
     months = np.arange(1, years * 12 + 1)
     savings = np.cumsum(np.random.normal(monthly_savings, monthly_savings * 0.1, years * 12))
-
 
     # --- Chart selection ---
     st.subheader("📊 Visualization Options")
@@ -263,5 +243,3 @@ else:
             # Build PDF
             doc.build(elements)
             st.download_button("Download PDF", data=buffer.getvalue(), file_name=f"roi_report_{state}_{category}.pdf", mime="application/pdf")
-
-
