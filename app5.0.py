@@ -21,24 +21,21 @@ with menu[0]:
     # IoT Explanation Box
     st.info("""
     🔗 **IoT in Green Investment**
-    
-    Internet of Things (IoT) devices such as smart sensors and meters help businesses 
-    track energy, water, and waste usage in real-time. By monitoring efficiency, 
-    SMEs can identify savings opportunities, reduce environmental impact, 
-    and improve the accuracy of ROI calculations for green investments.
+    Internet of Things (IoT) devices such as smart sensors and meters help businesses track energy, water, and waste usage in real-time. 
+    By monitoring efficiency, SMEs can identify savings opportunities, reduce environmental impact, and improve the accuracy of ROI calculations for green investments.
     """)
 
     st.header("📢 Latest News")
     st.markdown("""
-    - [RHB Empowers SMEs with Green Financing for Sustainable Growth](https://www.malaysiasme.com.my/rhb-empowers-smes-with-green-financing-for-sustainable-growth/)  
-    - [SME Bank Sustainability Roadmap 2.0](https://www.smebank.com.my/w/sustainability-roadmap-2.0)  
+    - [RHB Empowers SMEs with Green Financing for Sustainable Growth](https://www.malaysiasme.com.my/rhb-empowers-smes-with-green-financing-for-sustainable-growth/)
+    - [SME Bank Sustainability Roadmap 2.0](https://www.smebank.com.my/w/sustainability-roadmap-2.0)
     """)
 
     st.header("🤝 Green Financing Support Links")
     st.markdown("""
-    - [Green Technology Financing Scheme (GTFS)](https://www.gtfs.my/)  
-    - [Bank Islam Eco SME Banking](https://www.bankislam.com/business-banking/sme-banking/eco/)  
-    - [Maybank ESG Financing](https://www.maybank2u.com.my/maybank2u/malaysia/en/business/sme/grow/esg-financing-listing.page)  
+    - [Green Technology Financing Scheme (GTFS)](https://www.gtfs.my/)
+    - [Bank Islam Eco SME Banking](https://www.bankislam.com/business-banking/sme-banking/eco/)
+    - [Maybank ESG Financing](https://www.maybank2u.com.my/maybank2u/malaysia/en/business/sme/grow/esg-financing-listing.page)
     """)
 
     st.success("This hub provides SMEs with awareness, resources, and financial guidance for a sustainable future.")
@@ -185,6 +182,35 @@ with menu[1]:
             ]))
             elements.append(Paragraph("📆 Yearly Savings Summary", styles['Heading2']))
             elements.append(table_yearly)
+            elements.append(Spacer(1, 12))
+
+            # ROI summary
+            roi_summary_text = f"Payback achieved in ~{payback_years:.1f} years"
+            roi_summary_table = Table([[Paragraph(f"<b>{roi_summary_text}</b>", styles['Normal'])]], colWidths=[300])
+            roi_summary_table.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (-1, -1), colors.lightgreen),
+                ('BOX', (0, 0), (-1, -1), 1, colors.green),
+                ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+            ]))
+            roi_summary_wrapper = Table([[roi_summary_table]], colWidths=[450])
+            roi_summary_wrapper.setStyle(TableStyle([('ALIGN', (0, 0), (-1, -1), 'CENTER')]))
+            elements.append(roi_summary_wrapper)
+            elements.append(Spacer(1, 6))
+
+            # Final ROI
+            roi_final = ((df_yearly["Yearly Cumulative Savings"].iloc[-1] - investment) / investment) * 100
+            roi_final_text = f"Final ROI after {years} years: {roi_final:.2f}%"
+            roi_final_table = Table([[Paragraph(f"<b>{roi_final_text}</b>", styles['Normal'])]], colWidths=[300])
+            roi_final_table.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (-1, -1), colors.lightgreen),
+                ('BOX', (0, 0), (-1, -1), 1, colors.green),
+                ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+            ]))
+            roi_final_wrapper = Table([[roi_final_table]], colWidths=[450])
+            roi_final_wrapper.setStyle(TableStyle([('ALIGN', (0, 0), (-1, -1), 'CENTER')]))
+            elements.append(roi_final_wrapper)
             elements.append(Spacer(1, 12))
 
             # Add charts if selected
