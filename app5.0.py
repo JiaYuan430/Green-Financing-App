@@ -71,31 +71,24 @@ with menu[1]:
     investment = st.number_input("💰 Initial Investment (RM)", min_value=1000, value=50000, step=1000)
 
     # ---------------- Default Monthly Savings ----------------
-    if category == "Solar":
-        # Ask user for house type
-        house_type = st.selectbox("Select Your House Type", ["Terrace House", "Semi-detached", "Bungalow"])
-        
-        # Map house type to typical system capacity (kWp)
-        house_solar_system = {
-            "Terrace House": 5,      # avg 4–6 kWp
-            "Semi-detached": 7.5,    # avg 6–9 kWp
-            "Bungalow": 11           # avg 9–13 kWp
-        }
+if category == "Solar":
+    # Ask user for house type
+    house_type = st.selectbox("Select Your House Type", ["Terrace House", "Semi-detached", "Bungalow"])
+    
+    # Map house type to typical system capacity (kWp)
+    house_solar_system = {
+        "Terrace House": 5,      # avg 4–6 kWp
+        "Semi-detached": 7.5,    # avg 6–9 kWp
+        "Bungalow": 11           # avg 9–13 kWp
+    }
 
-        # Corresponding estimated monthly savings (RM) from system size
-        system_savings_rm = {
-            4.5: 185,
-            5.5: 260,
-            7: 354,
-            9.5: 484,
-            11.5: 613,
-            13: 695
-        }
+    system_size = house_solar_system[house_type]
 
-        system_size = house_solar_system[house_type]
-
-        # Set default monthly savings based on system size
-        monthly_savings_default = system_savings_rm.get(system_size, 300)  # fallback
+    # Estimate monthly savings based on state average + system size
+    # Assume average system size across keys = 7.5 kWp (for scaling)
+    average_system_size = 7.5
+    annual_saving = solar_data[state]  # yearly RM saving per state
+    monthly_savings_default = int((annual_saving * (system_size / average_system_size)) / 12)
 
     elif category == "Water":
         monthly_savings_default = water_data[state]  # average monthly bill as default
@@ -268,3 +261,4 @@ with menu[1]:
             # Build PDF
             doc.build(elements)
             st.download_button("Download PDF", data=buffer.getvalue(), file_name=f"roi_report_{state}_{category}.pdf", mime="application/pdf")
+
