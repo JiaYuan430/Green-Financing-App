@@ -49,8 +49,8 @@ with menu[1]:
 
     # State lists and solar yearly potential (kWh)
     solar_data = {
-        "Johor": 1663.31, "Kedah": 1797.00, "Kelantan": 1726.84, "Kuala Lumpur": 1663.42,
-        "Labuan": 1904.39, "Melaka": 1722.05, "Negeri Sembilan": 1676.98, "Pahang": 1704.77,
+        "Johor": 1663.31, "Kedah": 1797.00, "Kelantan": 1726.84, "Kuala Lumpur": 1663.42, 
+        "Melaka": 1722.05, "Negeri Sembilan": 1676.98, "Pahang": 1704.77,
         "Perak": 1747.96, "Perlis": 1810.04, "Pulau Pinang": 1820.17, "Putrajaya": 1719.69,
         "Sabah": 1756.45, "Sarawak": 1696.05, "Selangor": 1724.90, "Trengganu": 1689.71
     }
@@ -264,4 +264,5 @@ with menu[1]:
 
             doc.build(elements)
             st.download_button("Download PDF", data=buffer.getvalue(), file_name=f"roi_report_{state}_{category}.pdf", mime="application/pdf")
+
 
