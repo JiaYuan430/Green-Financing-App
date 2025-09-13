@@ -46,11 +46,69 @@ with menu[1]:
 
     # Category selection
     categories = ["Solar", "Water", "Waste Management", "Energy Efficiency", "Other"]
-    category = st.selectbox("Select Investment Category", categories)
+
+    # ---------------- State Selection & Average Data ----------------
+    # State lists
+    solar_data = {
+        "Johor": 1663.31, "Kedah": 1797.00, "Kelantan": 1726.84, "Kuala Lumpur": 1663.42,
+        "Labuan": 1904.39, "Melaka": 1722.05, "Negeri Sembilan": 1676.98, "Pahang": 1704.77,
+        "Perak": 1747.96, "Perlis": 1810.04, "Pulau Pinang": 1820.17, "Putrajaya": 1719.69,
+        "Sabah": 1756.45, "Sarawak": 1696.05, "Selangor": 1724.90, "Trengganu": 1689.71
+    }
+
+    water_data = {
+        "Kuala Lumpur": 15.4, "Selangor": 15.4, "Perak": 12.6, "Pahang": 10.2, "Negeri Sembilan": 13,
+        "Johor": 21, "Kelantan": 11.4, "Terengganu": 10, "Kedah": 18, "Perlis": 11.3,
+        "Penang": 5, "Melaka": 14.4, "Sarawak": 12.6, "Sabah": 11.8
+    }
+
+    state_list = list(solar_data.keys())
+    state = st.selectbox("🏙️ Select Your State", state_list)
+
+    category = st.selectbox("Select Investment Category", ["Solar", "Water", "Waste Management", "Energy Efficiency", "Other"])
 
     # User inputs
     investment = st.number_input("💰 Initial Investment (RM)", min_value=1000, value=50000, step=1000)
-    monthly_savings = st.number_input("⚡ Monthly Savings (RM)", min_value=100, value=3000, step=100)
+
+    # ---------------- Default Monthly Savings ----------------
+    if category == "Solar":
+        # Ask user for house type
+        house_type = st.selectbox("Select Your House Type", ["Terrace House", "Semi-detached", "Bungalow"])
+        
+        # Map house type to typical system capacity (kWp)
+        house_solar_system = {
+            "Terrace House": 5,      # avg 4–6 kWp
+            "Semi-detached": 7.5,    # avg 6–9 kWp
+            "Bungalow": 11           # avg 9–13 kWp
+        }
+
+        # Corresponding estimated monthly savings (RM) from system size
+        system_savings_rm = {
+            4.5: 185,
+            5.5: 260,
+            7: 354,
+            9.5: 484,
+            11.5: 613,
+            13: 695
+        }
+
+        system_size = house_solar_system[house_type]
+
+        # Set default monthly savings based on system size
+        monthly_savings_default = system_savings_rm.get(system_size, 300)  # fallback
+
+    elif category == "Water":
+        monthly_savings_default = water_data[state]  # average monthly bill as default
+    else:
+        monthly_savings_default = 1000  # fallback for other categories
+
+    monthly_savings = st.number_input(
+        "⚡ Monthly Savings (RM)", 
+        min_value=50,  # lower min_value to prevent errors
+        value=int(monthly_savings_default), 
+        step=50
+    )
+
     years = st.slider("⏳ Investment Horizon (Years)", 1, 10, 5)
 
     # ROI calculation
@@ -237,3 +295,4 @@ with menu[1]:
             # Build PDF
             doc.build(elements)
             st.download_button("Download PDF", data=buffer.getvalue(), file_name="roi_report.pdf", mime="application/pdf")
+
