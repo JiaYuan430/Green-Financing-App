@@ -214,23 +214,26 @@ with menu[1]:
             elements.append(roi_final_wrapper)
             elements.append(Spacer(1, 12))
 
-            # Always include all 3 charts in PDF
-            img_buffer1 = BytesIO()
-            fig1.savefig(img_buffer1, format="png")
-            img_buffer1.seek(0)
-            elements.append(Image(img_buffer1, width=400, height=200))
-            elements.append(Spacer(1, 12))
+            # --- Charts (only if they exist) ---
+            if "Cumulative Savings Over Time" in selected_charts and "fig1" in locals():
+                img_buffer1 = BytesIO()
+                fig1.savefig(img_buffer1, format="png")
+                img_buffer1.seek(0)
+                elements.append(Image(img_buffer1, width=400, height=200))
+                elements.append(Spacer(1, 12))
 
-            img_buffer2 = BytesIO()
-            fig2.savefig(img_buffer2, format="png")
-            img_buffer2.seek(0)
-            elements.append(Image(img_buffer2, width=400, height=200))
-            elements.append(Spacer(1, 12))
+            if "Investment vs. Total Savings" in selected_charts and "fig2" in locals():
+                img_buffer2 = BytesIO()
+                fig2.savefig(img_buffer2, format="png")
+                img_buffer2.seek(0)
+                elements.append(Image(img_buffer2, width=400, height=200))
+                elements.append(Spacer(1, 12))
 
-            img_buffer3 = BytesIO()
-            fig3.savefig(img_buffer3, format="png")
-            img_buffer3.seek(0)
-            elements.append(Image(img_buffer3, width=400, height=200))
+            if "ROI Benchmark by Category" in selected_charts and "fig3" in locals():
+                img_buffer3 = BytesIO()
+                fig3.savefig(img_buffer3, format="png")
+                img_buffer3.seek(0)
+                elements.append(Image(img_buffer3, width=400, height=200))
 
             # Build PDF
             doc.build(elements)
