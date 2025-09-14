@@ -14,7 +14,7 @@ st.set_page_config(page_title="Green Financing Awareness", layout="wide")
 # Top navigation menu
 menu = st.tabs(["🏠 Home", "💹 ROI Calculator"])
 
-# ---------------- HOME PAGE ----------------
+# HOME PAGE
 with menu[0]:
     st.title("🌱 Green Financing Awareness Hub")
 
@@ -40,7 +40,7 @@ with menu[0]:
 
     st.success("This hub provides SMEs with awareness, resources, and financial guidance for a sustainable future.")
 
-# ---------------- ROI CALCULATOR PAGE ----------------
+# ROI CALCULATOR PAGE
 with menu[1]:
     st.title("💹 ROI Calculator for Green Investment")
 
@@ -130,7 +130,7 @@ with menu[1]:
     months = np.arange(1, years * 12 + 1)
     savings = np.cumsum(np.random.normal(monthly_savings, monthly_savings * 0.1, years * 12))
 
-    # --- Chart section ---
+    # Chart section
     st.subheader("📊 Visualization Options")
     chart_options = ["Cumulative Savings Over Time", "Investment vs. Total Savings"]
     selected_charts = st.multiselect("Select chart(s) to display", chart_options)
@@ -158,7 +158,7 @@ with menu[1]:
                 ax2.set_title(f"Investment vs. Total Savings in {state} for {category}")
                 st.pyplot(fig2)
 
-    # ---------------- Export options ----------------
+    # Export options
     st.subheader("📤 Export Report")
     export_format = st.selectbox("Choose format", ["CSV", "PDF"])
 
@@ -230,7 +230,7 @@ with menu[1]:
             elements.append(table_yearly)
             elements.append(Spacer(1, 12))
 
-            # ---------------- ROI Summary ----------------
+            # ROI Summary
             roi_summary_text = (f"ROI: {roi:.2f}% | Total Savings: RM {total_savings:,.2f} | Investment: RM {investment:,.2f}<br/>"
     )
             roi_summary_table = Table([[Paragraph(f"<b>{roi_summary_text}</b>", styles['Normal'])]], colWidths=[400])
@@ -264,6 +264,7 @@ with menu[1]:
 
             doc.build(elements)
             st.download_button("Download PDF", data=buffer.getvalue(), file_name=f"roi_report_{state}_{category}.pdf", mime="application/pdf")
+
 
 
 
