@@ -96,14 +96,61 @@ with menu[1]:
     avg_monthly_consumption = st.number_input("🏠 Average Monthly Electricity Consumption (kWh)", min_value=50, value=400, step=10)
 
     # Default monthly savings
-    if category == "Solar":
-        yearly_solar_kwh = solar_data[state]
+    # --- ROI Calculation (improved Solar + Water) ---
+
+# Solar panel system assumptions (system size, cost, etc.)
+house_types = {
+    "Terrace House": {"system_range": (4, 6), "cost_range": (16000, 24000)},
+    "Semi-detached": {"system_range": (6, 9), "cost_range": (24000, 34000)},
+    "Bungalow": {"system_range": (9, 13), "cost_range": (34000, 46000)}
+}
+
+# TNB bill vs suggested solar PV size (simplified mapping)
+solar_bill_map = [
+    {"min": 170, "max": 230, "size": 4.5, "kwh": 473, "saving": (168, 203)},
+    {"min": 240, "max": 310, "size": 5.5, "kwh": 578, "saving": (239, 281)},
+    {"min": 320, "max": 440, "size": 7.0, "kwh": 735, "saving": (319, 389)},
+    {"min": 450, "max": 570, "size": 9.5, "kwh": 998, "saving": (448, 520)},
+    {"min": 580, "max": 700, "size": 11.5, "kwh": 1208, "saving": (577, 648)},
+    {"min": 701, "max": 99999, "size": 13.0, "kwh": 1365, "saving": (685, 704)},
+]
+
+# Water tariffs (RM/m³) by state (example values, you can update)
+water_tariffs = {
+    "Kuala Lumpur": 0.57, "Selangor": 0.57, "Perak": 0.50, "Pahang": 0.48,
+    "Negeri Sembilan": 0.55, "Johor": 0.60, "Kelantan": 0.45, "Terengganu": 0.47,
+    "Kedah": 0.52, "Perlis": 0.49, "Pulau Pinang": 0.50, "Melaka": 0.53,
+    "Sarawak": 0.51, "Sabah": 0.50
+}
+
+# User Input
+if category == "Solar":
+    house_type = st.selectbox("🏠 Type of House", list(house_types.keys()))
+    tnb_bill = st.number_input("💡 Average Monthly TNB Bill (RM)", min_value=100, value=400, step=10)
+
+    # match bill to suggested solar size
+    suggested = next((item for item in solar_bill_map if item["min"] <= tnb_bill <= item["max"]), None)
+    if suggested:
+        system_size_kw = suggested["size"]
+        yearly_solar_kwh = solar_data[state] * system_size_kw * 0.8   # apply performance ratio (80%)
         monthly_solar_kwh = yearly_solar_kwh / 12
-        monthly_savings_default = calculate_solar_savings(avg_monthly_consumption, monthly_solar_kwh)
-    elif category == "Water":
-        monthly_savings_default = water_data[state]
+        monthly_savings_default = int(np.mean(suggested["saving"]))
     else:
-        monthly_savings_default = 1000
+        system_size_kw = 5.0
+        yearly_solar_kwh = solar_data[state] * system_size_kw * 0.8
+        monthly_solar_kwh = yearly_solar_kwh / 12
+        monthly_savings_default = int(monthly_solar_kwh * 0.5)  # fallback rough calc
+
+elif category == "Water":
+    monthly_usage = st.number_input("🚰 Monthly Water Usage (m³)", min_value=5, value=20, step=1)
+    efficiency = st.slider("💧 Efficiency Improvement (%)", 1, 50, 20)
+    tariff = water_tariffs.get(state, 0.5)
+
+    monthly_bill = monthly_usage * tariff
+    monthly_savings_default = int(monthly_bill * (efficiency / 100))
+
+else:
+    monthly_savings_default = 1000
 
     monthly_savings = st.number_input(
         "⚡ Monthly Savings (RM)", 
@@ -264,6 +311,7 @@ with menu[1]:
 
             doc.build(elements)
             st.download_button("Download PDF", data=buffer.getvalue(), file_name=f"roi_report_{state}_{category}.pdf", mime="application/pdf")
+
 
 
 
