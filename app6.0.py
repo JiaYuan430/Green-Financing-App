@@ -123,7 +123,7 @@ water_tariffs = {
     "Sarawak": 0.51, "Sabah": 0.50
 }
 
-# User Input
+# Default User Input Value
 if category == "Solar":
     house_type = st.selectbox("🏠 Type of House", list(house_types.keys()))
     tnb_bill = st.number_input("💡 Average Monthly TNB Bill (RM)", min_value=100, value=400, step=10)
@@ -132,14 +132,14 @@ if category == "Solar":
     suggested = next((item for item in solar_bill_map if item["min"] <= tnb_bill <= item["max"]), None)
     if suggested:
         system_size_kw = suggested["size"]
-        yearly_solar_kwh = solar_data[state] * system_size_kw * 0.8   # apply performance ratio (80%)
+        yearly_solar_kwh = solar_data[state] * system_size_kw * 0.8   # performance ratio
         monthly_solar_kwh = yearly_solar_kwh / 12
         monthly_savings_default = int(np.mean(suggested["saving"]))
     else:
         system_size_kw = 5.0
         yearly_solar_kwh = solar_data[state] * system_size_kw * 0.8
         monthly_solar_kwh = yearly_solar_kwh / 12
-        monthly_savings_default = int(monthly_solar_kwh * 0.5)  # fallback rough calc
+        monthly_savings_default = int(monthly_solar_kwh * 0.5)
 
 elif category == "Water":
     monthly_usage = st.number_input("🚰 Monthly Water Usage (m³)", min_value=5, value=20, step=1)
@@ -153,25 +153,26 @@ else:
     monthly_savings_default = 1000
 
 monthly_savings = st.number_input(
-        "⚡ Monthly Savings (RM)", 
-        min_value=1,
-        value=int(monthly_savings_default), 
-        step=100
-    )
+    "⚡ Monthly Savings (RM)", 
+    min_value=1,
+    value=int(monthly_savings_default), 
+    step=100
+)
 
-    years = st.slider("⏳ Investment Horizon (Years)", 1, 10, 5)
+years = st.slider("⏳ Investment Horizon (Years)", 1, 10, 5)
 
-    # ROI calculation
-    total_savings = monthly_savings * 12 * years
-    roi = ((total_savings - investment) / investment) * 100
-    payback_months = investment / monthly_savings
-    payback_years = payback_months / 12
+# ROI calculation
+total_savings = monthly_savings * 12 * years
+roi = ((total_savings - investment) / investment) * 100
+payback_months = investment / monthly_savings
+payback_years = payback_months / 12
 
-    st.subheader("📊 Results")
-    st.write(f"**Category:** {category}")
-    st.write(f"**Total Savings (over {years} years): RM {total_savings:,.2f}**")
-    st.write(f"**ROI: {roi:.2f}%**")
-    st.write(f"**Payback Period: {payback_months:.1f} months (~{payback_years:.1f} years)**")
+st.subheader("📊 Results")
+st.write(f"**Category:** {category}")
+st.write(f"**Total Savings (over {years} years): RM {total_savings:,.2f}**")
+st.write(f"**ROI: {roi:.2f}%**")
+st.write(f"**Payback Period: {payback_months:.1f} months (~{payback_years:.1f} years)**")
+
 
     # Monthly savings chart data
     months = np.arange(1, years * 12 + 1)
@@ -311,6 +312,7 @@ monthly_savings = st.number_input(
 
             doc.build(elements)
             st.download_button("Download PDF", data=buffer.getvalue(), file_name=f"roi_report_{state}_{category}.pdf", mime="application/pdf")
+
 
 
 
