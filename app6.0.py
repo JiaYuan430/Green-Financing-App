@@ -67,7 +67,7 @@ with menu[1]:
     category = st.selectbox("Select Investment Category", categories)
 
     # User inputs
-    investment = st.number_input("💰 Initial Investment (RM)", min_value=1000, value=50000, step=1000)
+    investment = st.number_input("💰 Initial Investment (RM)", min_value=1000, value=5000, step=1000)
 
     # Tiered TNB residential tariff
     tariffs_tiers = [
@@ -418,3 +418,4 @@ if st.button("Export Report"):
             file_name=f"roi_report_{state}_{category}.pdf", 
             mime="application/pdf"
         )
+
