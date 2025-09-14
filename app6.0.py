@@ -192,231 +192,229 @@ with menu[1]:
         st.write(f"🏠 Average Monthly Consumption: {monthly_kwh} kWh")
         st.write(f"💡 Average Monthly Bill: RM {monthly_bill}")
 
-        # Water tariffs (RM/m³) by state
-        water_tariffs = {
-            "Kuala Lumpur": 0.57,
-            "Selangor": 0.57,
-            "Perak": 0.50,
-            "Pahang": 0.48,
-            "Negeri Sembilan": 0.55,
-            "Johor": 0.60,
-            "Kelantan": 0.45,
-            "Terengganu": 0.47,
-            "Kedah": 0.52,
-            "Perlis": 0.49,
-            "Pulau Pinang": 0.50,
-            "Melaka": 0.53,
-            "Sarawak": 0.51,
-            "Sabah": 0.50
-        }
-        
-        # Default User Input Value
-        if category == "Solar":
-            pass
-        elif category == "Water":
-            monthly_usage = st.number_input("🚰 Monthly Water Usage (m³)", min_value=1, value=20, step=1)
-            efficiency = st.slider("💧 Efficiency Improvement (%)", 1, 50, 20)
-            tariff = water_tariffs.get(state, 0.5)
-            monthly_bill = monthly_usage * tariff
-            monthly_savings_default = int(monthly_bill * (efficiency / 100))
-        else:
-            monthly_savings_default = 1000
-        
-        monthly_savings = st.number_input(
-            "⚡ Monthly Savings (RM)", 
-            min_value=1, 
-            value=int(monthly_savings_default), 
-            step=100
-        )
-        years = st.slider("⏳ Investment Horizon (Years)", 1, 10, 5)
-        
-        # ROI calculation
-        total_savings = monthly_savings * 12 * years
-        roi = ((total_savings - investment) / investment) * 100
-        payback_months = (investment / monthly_savings) if monthly_savings > 0 else float('inf')
-        payback_years = payback_months / 12 if payback_months != float('inf') else float('inf')
-        
-        st.subheader("📊 Results")
-        st.write(f"**Category:** {category}")
-        st.write(f"**Total Savings (over {years} years): RM {total_savings:,.2f}**")
-        st.write(f"**ROI: {roi:.2f}%**")
-        
-        if payback_months != float('inf'):
-            st.write(f"**Payback Period: {payback_months:.1f} months (~{payback_years:.1f} years)**")
-        else:
-            st.write("**Payback Period: N/A (monthly savings = 0)**")
-        
-        # Monthly savings chart data
-        np.random.seed(0)
-        months = np.arange(1, years * 12 + 1)
-        noise = np.random.normal(0, monthly_savings * 0.05, years * 12)
-        savings = np.cumsum(np.full(years * 12, monthly_savings) + noise)
-        
-        # Chart section
-        st.subheader("📊 Visualization Options")
-        chart_options = ["Cumulative Savings Over Time", "Investment vs. Total Savings"]
-        selected_charts = st.multiselect("Select chart(s) to display", chart_options)
-        fig1 = fig2 = None
-        
-        if "Cumulative Savings Over Time" in selected_charts or "Investment vs. Total Savings" in selected_charts:
-            col1, col2 = st.columns(2)
-        
-            if "Cumulative Savings Over Time" in selected_charts:
-                with col1:
-                    fig1, ax1 = plt.subplots(figsize=(6, 4))
-                    ax1.plot(months, savings, label="Cumulative Savings")
-                    ax1.axhline(y=investment, linestyle="--", label="Initial Investment")
-                    if monthly_savings > 0 and payback_months <= years * 12:
-                        ax1.axvline(x=payback_months, linestyle="--", label="Payback Period")
-                    ax1.set_xlabel("Months")
-                    ax1.set_ylabel("RM")
-                    ax1.set_title(f"Monthly Cumulative Savings in {state} for {category}")
-                    ax1.legend()
-                    st.pyplot(fig1)
-        
-            if "Investment vs. Total Savings" in selected_charts:
-                with col2:
-                    fig2, ax2 = plt.subplots(figsize=(6, 4))
-                    ax2.bar(["Initial Investment", f"Savings ({years} yrs)"], [investment, total_savings])
-                    ax2.set_ylabel("RM")
-                    ax2.set_title(f"Investment vs. Total Savings in {state} for {category}")
-                    st.pyplot(fig2)
-        
-        # Export options
-        st.subheader("📤 Export Report")
-        export_format = st.selectbox("Choose format", ["CSV", "PDF"])
-        if st.button("Export Report"):
-            # Prepare dataframes
-            df_monthly = pd.DataFrame({"Month": months, "Cumulative Savings": savings})
-            df_yearly = df_monthly.groupby((df_monthly.index) // 12 + 1).last().reset_index(drop=True)
-            df_yearly.index += 1
-            df_yearly = df_yearly.rename(columns={"Cumulative Savings": "Yearly Cumulative Savings"})
-            df_yearly.insert(0, "Year", df_yearly.index)
-        
-            if export_format == "CSV":
-                csv_monthly = df_monthly.to_csv(index=False).encode("utf-8")
-                st.download_button(
-                    "Download Monthly CSV", 
-                    data=csv_monthly, 
-                    file_name=f"roi_monthly_{state}_{category}.csv", 
-                    mime="text/csv"
-                )
-                csv_yearly = df_yearly.to_csv(index=False).encode("utf-8")
-                st.download_button(
-                    "Download Yearly CSV", 
-                    data=csv_yearly, 
-                    file_name=f"roi_yearly_{state}_{category}.csv", 
-                    mime="text/csv"
-                )
-        
-            elif export_format == "PDF":
-                buffer = BytesIO()
-                doc = SimpleDocTemplate(buffer, pagesize=A4)
-                styles = getSampleStyleSheet()
-                elements = []
-        
-                # Report text
-                elements.append(Paragraph("ROI Report - Green Investment", styles['Title']))
+    # Water tariffs (RM/m³) by state
+    water_tariffs = {
+        "Kuala Lumpur": 0.57,
+        "Selangor": 0.57,
+        "Perak": 0.50,
+        "Pahang": 0.48,
+        "Negeri Sembilan": 0.55,
+        "Johor": 0.60,
+        "Kelantan": 0.45,
+        "Terengganu": 0.47,
+        "Kedah": 0.52,
+        "Perlis": 0.49,
+        "Pulau Pinang": 0.50,
+        "Melaka": 0.53,
+        "Sarawak": 0.51,
+        "Sabah": 0.50
+    }
+    
+    # Default User Input Value
+    if category == "Solar":
+        pass
+    elif category == "Water":
+        monthly_usage = st.number_input("🚰 Monthly Water Usage (m³)", min_value=1, value=20, step=1)
+        efficiency = st.slider("💧 Efficiency Improvement (%)", 1, 50, 20)
+        tariff = water_tariffs.get(state, 0.5)
+        monthly_bill = monthly_usage * tariff
+        monthly_savings_default = int(monthly_bill * (efficiency / 100))
+    else:
+        monthly_savings_default = 1000
+    
+    monthly_savings = st.number_input(
+        "⚡ Monthly Savings (RM)", 
+        min_value=1, 
+        value=int(monthly_savings_default), 
+        step=100
+    )
+    years = st.slider("⏳ Investment Horizon (Years)", 1, 10, 5)
+    
+    # ROI calculation
+    total_savings = monthly_savings * 12 * years
+    roi = ((total_savings - investment) / investment) * 100
+    payback_months = (investment / monthly_savings) if monthly_savings > 0 else float('inf')
+    payback_years = payback_months / 12 if payback_months != float('inf') else float('inf')
+    
+    st.subheader("📊 Results")
+    st.write(f"**Category:** {category}")
+    st.write(f"**Total Savings (over {years} years): RM {total_savings:,.2f}**")
+    st.write(f"**ROI: {roi:.2f}%**")
+    
+    if payback_months != float('inf'):
+        st.write(f"**Payback Period: {payback_months:.1f} months (~{payback_years:.1f} years)**")
+    else:
+        st.write("**Payback Period: N/A (monthly savings = 0)**")
+    
+    # Monthly savings chart data
+    np.random.seed(0)
+    months = np.arange(1, years * 12 + 1)
+    noise = np.random.normal(0, monthly_savings * 0.05, years * 12)
+    savings = np.cumsum(np.full(years * 12, monthly_savings) + noise)
+    
+    # Chart section
+    st.subheader("📊 Visualization Options")
+    chart_options = ["Cumulative Savings Over Time", "Investment vs. Total Savings"]
+    selected_charts = st.multiselect("Select chart(s) to display", chart_options)
+    fig1 = fig2 = None
+    
+    if "Cumulative Savings Over Time" in selected_charts or "Investment vs. Total Savings" in selected_charts:
+        col1, col2 = st.columns(2)
+    
+        if "Cumulative Savings Over Time" in selected_charts:
+            with col1:
+                fig1, ax1 = plt.subplots(figsize=(6, 4))
+                ax1.plot(months, savings, label="Cumulative Savings")
+                ax1.axhline(y=investment, linestyle="--", label="Initial Investment")
+                if monthly_savings > 0 and payback_months <= years * 12:
+                    ax1.axvline(x=payback_months, linestyle="--", label="Payback Period")
+                ax1.set_xlabel("Months")
+                ax1.set_ylabel("RM")
+                ax1.set_title(f"Monthly Cumulative Savings in {state} for {category}")
+                ax1.legend()
+                st.pyplot(fig1)
+    
+        if "Investment vs. Total Savings" in selected_charts:
+            with col2:
+                fig2, ax2 = plt.subplots(figsize=(6, 4))
+                ax2.bar(["Initial Investment", f"Savings ({years} yrs)"], [investment, total_savings])
+                ax2.set_ylabel("RM")
+                ax2.set_title(f"Investment vs. Total Savings in {state} for {category}")
+                st.pyplot(fig2)
+    
+    # Export options
+    st.subheader("📤 Export Report")
+    export_format = st.selectbox("Choose format", ["CSV", "PDF"])
+    if st.button("Export Report"):
+        # Prepare dataframes
+        df_monthly = pd.DataFrame({"Month": months, "Cumulative Savings": savings})
+        df_yearly = df_monthly.groupby((df_monthly.index) // 12 + 1).last().reset_index(drop=True)
+        df_yearly.index += 1
+        df_yearly = df_yearly.rename(columns={"Cumulative Savings": "Yearly Cumulative Savings"})
+        df_yearly.insert(0, "Year", df_yearly.index)
+    
+        if export_format == "CSV":
+            csv_monthly = df_monthly.to_csv(index=False).encode("utf-8")
+            st.download_button(
+                "Download Monthly CSV", 
+                data=csv_monthly, 
+                file_name=f"roi_monthly_{state}_{category}.csv", 
+                mime="text/csv"
+            )
+            csv_yearly = df_yearly.to_csv(index=False).encode("utf-8")
+            st.download_button(
+                "Download Yearly CSV", 
+                data=csv_yearly, 
+                file_name=f"roi_yearly_{state}_{category}.csv", 
+                mime="text/csv"
+            )
+    
+        elif export_format == "PDF":
+            buffer = BytesIO()
+            doc = SimpleDocTemplate(buffer, pagesize=A4)
+            styles = getSampleStyleSheet()
+            elements = []
+    
+            # Report text
+            elements.append(Paragraph("ROI Report - Green Investment", styles['Title']))
+            elements.append(Spacer(1, 12))
+            elements.append(Paragraph(f"State: {state}", styles['Normal']))
+            elements.append(Paragraph(f"Category: {category}", styles['Normal']))
+            elements.append(Paragraph(f"Initial Investment: RM {investment:,.2f}", styles['Normal']))
+            elements.append(Paragraph(f"Total Savings: RM {total_savings:,.2f}", styles['Normal']))
+            elements.append(Paragraph(f"ROI: {roi:.2f}%", styles['Normal']))
+    
+            if payback_months != float('inf'):
+                elements.append(Paragraph(f"Payback Period: {payback_months:.1f} months (~{payback_years:.1f} years)", styles['Normal']))
+            else:
+                elements.append(Paragraph("Payback Period: N/A", styles['Normal']))
+    
+            elements.append(Spacer(1, 12))
+    
+            # Monthly table
+            max_rows_for_pdf = 120  # avoid generating massive PDF tables
+            monthly_rows = list(zip(months, savings))
+            if len(monthly_rows) > max_rows_for_pdf:
+                monthly_rows = monthly_rows[:max_rows_for_pdf]
+                monthly_rows.append(("...", "..."))
+    
+            data_monthly = [["Month", "Cumulative Savings"]] + [[m, f"RM {s:,.2f}"] for m, s in monthly_rows]
+            table_monthly = Table(data_monthly, colWidths=[100, 200])
+            monthly_style = TableStyle([
+                ('BACKGROUND', (0, 0), (-1, 0), colors.green),
+                ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+                ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                ('GRID', (0, 0), (-1, -1), 0.5, colors.black),
+                ('BACKGROUND', (0, 1), (-1, -1), colors.whitesmoke)
+            ])
+    
+            # highlight payback row if within the included rows
+            if payback_months <= years * 12 and payback_months >= 1:
+                payback_row = int(round(payback_months))
+                if payback_row <= max_rows_for_pdf:
+                    monthly_style.add('BACKGROUND', (0, payback_row), (-1, payback_row), colors.yellow)
+                    monthly_style.add('TEXTCOLOR', (0, payback_row), (-1, payback_row), colors.black)
+                    monthly_style.add('FONTNAME', (0, payback_row), (-1, payback_row), 'Helvetica-Bold')
+    
+            table_monthly.setStyle(monthly_style)
+            elements.append(Paragraph("📅 Monthly Savings (sample)", styles['Heading2']))
+            elements.append(table_monthly)
+            elements.append(Spacer(1, 12))
+            elements.append(Paragraph("<i>Highlighted row = Month when investment is fully recovered (if within table)</i>", styles['Normal']))
+            elements.append(Spacer(1, 12))
+    
+            # Yearly table
+            data_yearly = [["Year", "Cumulative Savings"]] + [
+                [int(y), f"RM {s:,.2f}"] for y, s in zip(df_yearly["Year"], df_yearly["Yearly Cumulative Savings"])
+            ]
+            table_yearly = Table(data_yearly, colWidths=[100, 200])
+            table_yearly.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (-1, 0), colors.darkblue),
+                ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+                ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                ('GRID', (0, 0), (-1, -1), 0.5, colors.black),
+                ('BACKGROUND', (0, 1), (-1, -1), colors.whitesmoke)
+            ]))
+            elements.append(Paragraph("📆 Yearly Savings Summary", styles['Heading2']))
+            elements.append(table_yearly)
+            elements.append(Spacer(1, 12))
+    
+            # ROI Summary (single-row table)
+            roi_summary_text = (f"ROI: {roi:.2f}% | Total Savings: RM {total_savings:,.2f} | Investment: RM {investment:,.2f}")
+            roi_summary_table = Table([[Paragraph(f"<b>{roi_summary_text}</b>", styles['Normal'])]], colWidths=[400])
+            roi_summary_table.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (-1, -1), colors.lightgreen),
+                ('BOX', (0, 0), (-1, -1), 1, colors.green),
+                ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+                ('FONTSIZE', (0,0), (-1,-1), 10),
+            ]))
+            roi_summary_wrapper = Table([[roi_summary_table]], colWidths=[450])
+            roi_summary_wrapper.setStyle(TableStyle([('ALIGN', (0, 0), (-1, -1), 'CENTER')]))
+            elements.append(roi_summary_wrapper)
+            elements.append(Spacer(1, 12))
+    
+            # Charts
+            if fig1 is not None:
+                img_buffer1 = BytesIO()
+                fig1.savefig(img_buffer1, format="png", bbox_inches='tight')
+                img_buffer1.seek(0)
+                elements.append(Paragraph(f"Cumulative Savings Over Time ({state} - {category})", styles['Heading3']))
+                elements.append(Image(img_buffer1, width=400, height=200))
                 elements.append(Spacer(1, 12))
-                elements.append(Paragraph(f"State: {state}", styles['Normal']))
-                elements.append(Paragraph(f"Category: {category}", styles['Normal']))
-                elements.append(Paragraph(f"Initial Investment: RM {investment:,.2f}", styles['Normal']))
-                elements.append(Paragraph(f"Total Savings: RM {total_savings:,.2f}", styles['Normal']))
-                elements.append(Paragraph(f"ROI: {roi:.2f}%", styles['Normal']))
-        
-                if payback_months != float('inf'):
-                    elements.append(Paragraph(f"Payback Period: {payback_months:.1f} months (~{payback_years:.1f} years)", styles['Normal']))
-                else:
-                    elements.append(Paragraph("Payback Period: N/A", styles['Normal']))
-        
+    
+            if fig2 is not None:
+                img_buffer2 = BytesIO()
+                fig2.savefig(img_buffer2, format="png", bbox_inches='tight')
+                img_buffer2.seek(0)
+                elements.append(Paragraph(f"Investment vs. Total Savings ({state} - {category})", styles['Heading3']))
+                elements.append(Image(img_buffer2, width=400, height=200))
                 elements.append(Spacer(1, 12))
-        
-                # Monthly table
-                max_rows_for_pdf = 120  # avoid generating massive PDF tables
-                monthly_rows = list(zip(months, savings))
-                if len(monthly_rows) > max_rows_for_pdf:
-                    monthly_rows = monthly_rows[:max_rows_for_pdf]
-                    monthly_rows.append(("...", "..."))
-        
-                data_monthly = [["Month", "Cumulative Savings"]] + [[m, f"RM {s:,.2f}"] for m, s in monthly_rows]
-                table_monthly = Table(data_monthly, colWidths=[100, 200])
-                monthly_style = TableStyle([
-                    ('BACKGROUND', (0, 0), (-1, 0), colors.green),
-                    ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
-                    ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-                    ('GRID', (0, 0), (-1, -1), 0.5, colors.black),
-                    ('BACKGROUND', (0, 1), (-1, -1), colors.whitesmoke)
-                ])
-        
-                # highlight payback row if within the included rows
-                if payback_months <= years * 12 and payback_months >= 1:
-                    payback_row = int(round(payback_months))
-                    if payback_row <= max_rows_for_pdf:
-                        monthly_style.add('BACKGROUND', (0, payback_row), (-1, payback_row), colors.yellow)
-                        monthly_style.add('TEXTCOLOR', (0, payback_row), (-1, payback_row), colors.black)
-                        monthly_style.add('FONTNAME', (0, payback_row), (-1, payback_row), 'Helvetica-Bold')
-        
-                table_monthly.setStyle(monthly_style)
-                elements.append(Paragraph("📅 Monthly Savings (sample)", styles['Heading2']))
-                elements.append(table_monthly)
-                elements.append(Spacer(1, 12))
-                elements.append(Paragraph("<i>Highlighted row = Month when investment is fully recovered (if within table)</i>", styles['Normal']))
-                elements.append(Spacer(1, 12))
-        
-                # Yearly table
-                data_yearly = [["Year", "Cumulative Savings"]] + [
-                    [int(y), f"RM {s:,.2f}"] for y, s in zip(df_yearly["Year"], df_yearly["Yearly Cumulative Savings"])
-                ]
-                table_yearly = Table(data_yearly, colWidths=[100, 200])
-                table_yearly.setStyle(TableStyle([
-                    ('BACKGROUND', (0, 0), (-1, 0), colors.darkblue),
-                    ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
-                    ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-                    ('GRID', (0, 0), (-1, -1), 0.5, colors.black),
-                    ('BACKGROUND', (0, 1), (-1, -1), colors.whitesmoke)
-                ]))
-                elements.append(Paragraph("📆 Yearly Savings Summary", styles['Heading2']))
-                elements.append(table_yearly)
-                elements.append(Spacer(1, 12))
-        
-                # ROI Summary (single-row table)
-                roi_summary_text = (f"ROI: {roi:.2f}% | Total Savings: RM {total_savings:,.2f} | Investment: RM {investment:,.2f}")
-                roi_summary_table = Table([[Paragraph(f"<b>{roi_summary_text}</b>", styles['Normal'])]], colWidths=[400])
-                roi_summary_table.setStyle(TableStyle([
-                    ('BACKGROUND', (0, 0), (-1, -1), colors.lightgreen),
-                    ('BOX', (0, 0), (-1, -1), 1, colors.green),
-                    ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-                    ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-                    ('FONTSIZE', (0,0), (-1,-1), 10),
-                ]))
-                roi_summary_wrapper = Table([[roi_summary_table]], colWidths=[450])
-                roi_summary_wrapper.setStyle(TableStyle([('ALIGN', (0, 0), (-1, -1), 'CENTER')]))
-                elements.append(roi_summary_wrapper)
-                elements.append(Spacer(1, 12))
-        
-                # Charts
-                if fig1 is not None:
-                    img_buffer1 = BytesIO()
-                    fig1.savefig(img_buffer1, format="png", bbox_inches='tight')
-                    img_buffer1.seek(0)
-                    elements.append(Paragraph(f"Cumulative Savings Over Time ({state} - {category})", styles['Heading3']))
-                    elements.append(Image(img_buffer1, width=400, height=200))
-                    elements.append(Spacer(1, 12))
-        
-                if fig2 is not None:
-                    img_buffer2 = BytesIO()
-                    fig2.savefig(img_buffer2, format="png", bbox_inches='tight')
-                    img_buffer2.seek(0)
-                    elements.append(Paragraph(f"Investment vs. Total Savings ({state} - {category})", styles['Heading3']))
-                    elements.append(Image(img_buffer2, width=400, height=200))
-                    elements.append(Spacer(1, 12))
-        
-                doc.build(elements)
-                st.download_button(
-                    "Download PDF", 
-                    data=buffer.getvalue(), 
-                    file_name=f"roi_report_{state}_{category}.pdf", 
-                    mime="application/pdf"
-                )
-        
-        
+    
+            doc.build(elements)
+            st.download_button(
+                "Download PDF", 
+                data=buffer.getvalue(), 
+                file_name=f"roi_report_{state}_{category}.pdf", 
+                mime="application/pdf"
+            )
