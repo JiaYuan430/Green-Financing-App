@@ -120,47 +120,46 @@ with menu[1]:
     
     # Default User Input Value
     if category == "Solar":
-    house_types = {
-        "Terrace House": {"system_range": (4, 6), "cost_range": (16000, 24000)},
-        "Semi-detached": {"system_range": (6, 9), "cost_range": (24000, 34000)},
-        "Bungalow": {"system_range": (9, 13), "cost_range": (34000, 46000)}
-    }
-    house_type = st.selectbox("🏠 House Type", list(house_types.keys()))
-    system_min, system_max = house_types[house_type]["system_range"]
+        house_types = {
+            "Terrace House": {"system_range": (4, 6), "cost_range": (16000, 24000)},
+            "Semi-detached": {"system_range": (6, 9), "cost_range": (24000, 34000)},
+            "Bungalow": {"system_range": (9, 13), "cost_range": (34000, 46000)}
+        }
+        house_type = st.selectbox("🏠 House Type", list(house_types.keys()))
+        system_min, system_max = house_types[house_type]["system_range"]
 
-    solar_bill_map = [
-        {"min": 170, "max": 230, "size": 4.5, "kwh": 473, "saving": (168, 203)},
-        {"min": 240, "max": 310, "size": 5.5, "kwh": 578, "saving": (239, 281)},
-        {"min": 320, "max": 440, "size": 7.0, "kwh": 735, "saving": (319, 389)},
-        {"min": 450, "max": 570, "size": 9.5, "kwh": 998, "saving": (448, 520)},
-        {"min": 580, "max": 700, "size": 11.5, "kwh": 1208, "saving": (577, 648)},
-        {"min": 710, "max": 9999, "size": 13.0, "kwh": 1365, "saving": (685, 704)},
-    ]
+        solar_bill_map = [
+            {"min": 170, "max": 230, "size": 4.5, "kwh": 473, "saving": (168, 203)},
+            {"min": 240, "max": 310, "size": 5.5, "kwh": 578, "saving": (239, 281)},
+            {"min": 320, "max": 440, "size": 7.0, "kwh": 735, "saving": (319, 389)},
+            {"min": 450, "max": 570, "size": 9.5, "kwh": 998, "saving": (448, 520)},
+            {"min": 580, "max": 700, "size": 11.5, "kwh": 1208, "saving": (577, 648)},
+            {"min": 710, "max": 9999, "size": 13.0, "kwh": 1365, "saving": (685, 704)},
+        ]
 
-    monthly_bill = st.number_input("💡 Monthly TNB Bill (RM)", min_value=50, value=300, step=10)
+        monthly_bill = st.number_input("💡 Monthly TNB Bill (RM)", min_value=50, value=300, step=10)
 
-    matched = None
-    for row in solar_bill_map:
-        if row["min"] <= monthly_bill <= row["max"]:
-            matched = row
-            break
+        matched = None
+        for row in solar_bill_map:
+            if row["min"] <= monthly_bill <= row["max"]:
+                matched = row
+                break
 
-    if matched:
-        # check the size for house type
-        system_size_kw = matched["size"]
-        if system_size_kw < system_min:
-            system_size_kw = system_min
-        elif system_size_kw > system_max:
-            system_size_kw = system_max
+        if matched:
+            # check the size for house type
+            system_size_kw = matched["size"]
+            if system_size_kw < system_min:
+                system_size_kw = system_min
+            elif system_size_kw > system_max:
+                system_size_kw = system_max
 
-        monthly_savings_default = int(np.mean(matched["saving"]))
-    else:
-        # If not match
-        system_size_kw = (system_min + system_max) / 2
-        monthly_savings_default = int(system_size_kw * 60) 
+            monthly_savings_default = int(np.mean(matched["saving"]))
+        else:
+            # If not match
+            system_size_kw = (system_min + system_max) / 2
+            monthly_savings_default = int(system_size_kw * 60) 
 
-    st.write(f"🔧 Recommended System Size: {system_size_kw:.1f} kWp ({house_type})")
-
+        st.write(f"🔧 Recommended System Size: {system_size_kw:.1f} kWp ({house_type})")
     
     elif category == "Water":
         monthly_usage = st.number_input("🚰 Monthly Water Usage (m³)", min_value=5, value=20, step=1)
@@ -332,6 +331,7 @@ with menu[1]:
 
             doc.build(elements)
             st.download_button("Download PDF", data=buffer.getvalue(), file_name=f"roi_report_{state}_{category}.pdf", mime="application/pdf")
+
 
 
 
