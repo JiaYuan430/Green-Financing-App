@@ -16,7 +16,7 @@ menu = st.tabs(["🏠 Home", "💹 ROI Calculator"])
 
 # HOME PAGE
 with menu[0]:
-    st.title("🌱 Green Financing Awareness Hub")
+    st.title("Green Financing Awareness Hub")
 
     # IoT Explanation Box
     st.info("""
@@ -31,7 +31,7 @@ with menu[0]:
     - [SME Bank Sustainability Roadmap 2.0](https://www.smebank.com.my/w/sustainability-roadmap-2.0)
     """)
 
-    st.header("🤝 Green Financing Support Links")
+    st.header("Green Financing Support Links")
     st.markdown("""
     - [Green Technology Financing Scheme (GTFS)](https://www.gtfs.my/)
     - [Bank Islam Eco SME Banking](https://www.bankislam.com/business-banking/sme-banking/eco/)
@@ -47,7 +47,7 @@ with menu[1]:
     # Category selection
     categories = ["Solar", "Water", "Waste Management", "Energy Efficiency", "Other"]
 
-    # Solar yearly potential (kWh) by state (kept your values)
+    # Solar yearly potential (kWh) by state
     solar_data = {
         "Johor": 1663.31, "Kedah": 1797.00, "Kelantan": 1726.84, "Kuala Lumpur": 1663.42, 
         "Melaka": 1722.05, "Negeri Sembilan": 1676.98, "Pahang": 1704.77,
@@ -69,7 +69,7 @@ with menu[1]:
     # User inputs
     investment = st.number_input("💰 Initial Investment (RM)", min_value=1000, value=50000, step=1000)
 
-    # Tiered TNB residential tariff (ordered)
+    # Tiered TNB residential tariff
     tariffs_tiers = [
         (1, 200, 0.218),
         (201, 300, 0.334),
@@ -79,16 +79,11 @@ with menu[1]:
     ]
 
     def calculate_solar_savings(monthly_consumption_kwh, solar_offset_kwh):
-        """
-        Calculate savings (RM) from offsetting `solar_offset_kwh` out of `monthly_consumption_kwh`
-        using the tiered tariff structure.
-        """
         remaining_offset = solar_offset_kwh
         savings = 0.0
         for low, high, rate in tariffs_tiers:
             if remaining_offset <= 0:
                 break
-            # compute how much consumption falls into this tier
             tier_available = max(0, min(high, monthly_consumption_kwh) - low + 1)
             if tier_available <= 0:
                 continue
@@ -97,7 +92,7 @@ with menu[1]:
             remaining_offset -= use
         return round(savings, 2)
 
-    # Tariff calculation function (consistent with tiers)
+    # Tariff calculation function
     def calculate_bill_from_kwh(kwh):
         bill = 0.0
         remaining = kwh
@@ -112,14 +107,13 @@ with menu[1]:
                 break
         return round(bill, 2)
 
-    # Reverse calculation: estimate kWh from bill
+    # Reverse calculation
     def calculate_kwh_from_bill(target_bill, max_kwh=5000):
         for kwh in range(1, max_kwh + 1):
             if calculate_bill_from_kwh(kwh) >= target_bill:
                 return kwh
         return max_kwh
 
-    # House types (single canonical definition)
     house_types = {
         "Terrace House": {"system_range": (4, 6), "cost_range": (16000, 24000)},
         "Semi-detached": {"system_range": (6, 9), "cost_range": (24000, 34000)},
@@ -137,14 +131,12 @@ with menu[1]:
 
     input_type = st.radio("Choose input type", ["💡 Monthly electricity bill (RM)", "🏠 Monthly electricity consumption (kWh)"])
 
-    # If Solar selected, ask house type early so we have system range available when needed
     house_type = None
     system_min = system_max = None
     if category == "Solar":
         house_type = st.selectbox("🏠 House Type", list(house_types.keys()))
         system_min, system_max = house_types[house_type]["system_range"]
 
-    # Handle inputs depending on chosen input type
     if input_type == "💡 Monthly electricity bill (RM)":
         monthly_bill = st.number_input("Enter your monthly bill (RM)", min_value=10, max_value=20000, value=300)
         monthly_kwh = calculate_kwh_from_bill(monthly_bill)
@@ -163,7 +155,7 @@ with menu[1]:
             monthly_savings_default = int(np.mean(matched["saving"]))
             st.write(f"🔧 Recommended System Size: {system_size_kw:.1f} kWp ({house_type})")
         elif matched and category != "Solar":
-            # matched by bill but not solar category -> use matched savings estimate only
+            # matched by bill by using matched savings estimate only
             system_size_kw = None
             monthly_savings_default = int(np.mean(matched["saving"]))
         else:
@@ -180,21 +172,18 @@ with menu[1]:
         # user provides monthly kWh
         monthly_kwh = st.number_input("Enter your average monthly consumption (kWh)", min_value=1, max_value=50000, value=400)
         monthly_bill = calculate_bill_from_kwh(monthly_kwh)
-
-        # If solar chosen, provide a simple default system estimate based on kWh
+        
         if category == "Solar":
-            # estimate system size roughly proportional to monthly kWh (simple heuristic)
-            # note: this is lightweight — you can replace with a better site-specific estimate later
             estimated_system_kw = max(system_min, min((monthly_kwh / 100.0) * 1.0, system_max)) if system_min is not None else (monthly_kwh / 100.0)
             monthly_savings_default = int(estimated_system_kw * 60)
-            st.write(f"🔧 Estimated System Size (heuristic): {estimated_system_kw:.1f} kWp ({house_type})")
+            st.write(f"🔧 Estimated System Size: {estimated_system_kw:.1f} kWp ({house_type})")
         else:
             monthly_savings_default = 1000
 
     st.write(f"🏠 Average Monthly Consumption: {monthly_kwh} kWh")
     st.write(f"💡 Average Monthly Bill: RM {monthly_bill}")
 
-    # Water tariffs (RM/m³) by state (kept your map)
+    # Water tariffs (RM/m³) by state
     water_tariffs = {
         "Kuala Lumpur": 0.57, "Selangor": 0.57, "Perak": 0.50, "Pahang": 0.48,
         "Negeri Sembilan": 0.55, "Johor": 0.60, "Kelantan": 0.45, "Terengganu": 0.47,
@@ -202,9 +191,8 @@ with menu[1]:
         "Sarawak": 0.51, "Sabah": 0.50
     }
 
-    # Default User Input Value based on category
+    # Default User Input Value
     if category == "Solar":
-        # monthly_savings_default already set from above branches
         pass
     elif category == "Water":
         monthly_usage = st.number_input("🚰 Monthly Water Usage (m³)", min_value=1, value=20, step=1)
@@ -240,7 +228,7 @@ with menu[1]:
     else:
         st.write("**Payback Period: N/A (monthly savings = 0)**")
 
-    # Monthly savings chart data (deterministic-ish for reproducibility)
+    # Monthly savings chart data
     np.random.seed(0)
     months = np.arange(1, years * 12 + 1)
     noise = np.random.normal(0, monthly_savings * 0.05, years * 12)
@@ -314,7 +302,7 @@ with menu[1]:
                 elements.append(Paragraph("Payback Period: N/A", styles['Normal']))
             elements.append(Spacer(1, 12))
 
-            # Monthly table (cap rows to avoid huge PDFs)
+            # Monthly table
             max_rows_for_pdf = 120  # avoid generating massive PDF tables
             monthly_rows = list(zip(months, savings))
             if len(monthly_rows) > max_rows_for_pdf:
@@ -373,7 +361,7 @@ with menu[1]:
             elements.append(roi_summary_wrapper)
             elements.append(Spacer(1, 12))
 
-            # Charts: only include if figures were generated
+            # Charts
             if fig1 is not None:
                 img_buffer1 = BytesIO()
                 fig1.savefig(img_buffer1, format="png", bbox_inches='tight')
@@ -392,3 +380,4 @@ with menu[1]:
 
             doc.build(elements)
             st.download_button("Download PDF", data=buffer.getvalue(), file_name=f"roi_report_{state}_{category}.pdf", mime="application/pdf")
+
