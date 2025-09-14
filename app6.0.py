@@ -163,7 +163,7 @@ with menu[1]:
     export_format = st.selectbox("Choose format", ["CSV", "PDF"])
 
     if st.button("Export Report"):
-        # --- Prepare dataframes
+        # Prepare dataframes
         df_monthly = pd.DataFrame({"Month": months, "Cumulative Savings": savings})
         df_yearly = df_monthly.groupby((df_monthly.index)//12 + 1).last().reset_index(drop=True)
         df_yearly.index += 1
@@ -264,6 +264,7 @@ with menu[1]:
 
             doc.build(elements)
             st.download_button("Download PDF", data=buffer.getvalue(), file_name=f"roi_report_{state}_{category}.pdf", mime="application/pdf")
+
 
 
 
