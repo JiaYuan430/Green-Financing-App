@@ -93,6 +93,26 @@ with menu[1]:
                 break
         return savings
 
+    # Tariff calculation function
+    def calculate_bill_from_kwh(kwh):
+        bill = 0
+        remaining = kwh
+        tiers = [(200, 0.218), (100, 0.334), (300, 0.516), (300, 0.546), (float("inf"), 0.571)]
+        for limit, rate in tiers:
+            use = min(remaining, limit)
+            bill += use * rate
+            remaining -= use
+            if remaining <= 0:
+                break
+        return round(bill, 2)
+    
+    # Reverse calculation
+    def calculate_kwh_from_bill(target_bill, max_kwh=2000):
+        for kwh in range(1, max_kwh):
+            if calculate_bill_from_kwh(kwh) >= target_bill:
+                return kwh
+        return max_kwh
+    
     avg_monthly_consumption = st.number_input("🏠 Average Monthly Electricity Consumption (kWh)", min_value=50, value=400, step=10)
 
     house_types = {
@@ -110,6 +130,18 @@ with menu[1]:
         {"min": 701, "max": 99999, "size": 13.0, "kwh": 1365, "saving": (685, 704)},
     ]
     
+    input_type = st.radio("Choose input type", ["💡 I know my monthly electricity bill (RM)", "🏠 I know my monthly electricity consumption (kWh)"])
+    
+    if input_type == "💡 I know my monthly electricity bill (RM)":
+        monthly_bill = st.number_input("Enter your monthly bill (RM)", min_value=10, max_value=2000, value=300)
+        monthly_kwh = calculate_kwh_from_bill(monthly_bill)
+    else:
+        monthly_kwh = st.number_input("Enter your average monthly consumption (kWh)", min_value=50, max_value=2000, value=400)
+        monthly_bill = calculate_bill_from_kwh(monthly_kwh)
+    
+    st.write(f"🏠 Average Monthly Consumption: {monthly_kwh} kWh")
+    st.write(f"💡 Average Monthly Bill: RM {monthly_bill}")
+
     # Water tariffs (RM/m³) by state
     water_tariffs = {
         "Kuala Lumpur": 0.57, "Selangor": 0.57, "Perak": 0.50, "Pahang": 0.48,
@@ -331,6 +363,7 @@ with menu[1]:
 
             doc.build(elements)
             st.download_button("Download PDF", data=buffer.getvalue(), file_name=f"roi_report_{state}_{category}.pdf", mime="application/pdf")
+
 
 
 
