@@ -152,7 +152,7 @@ elif category == "Water":
 else:
     monthly_savings_default = 1000
 
-    monthly_savings = st.number_input(
+monthly_savings = st.number_input(
         "⚡ Monthly Savings (RM)", 
         min_value=1,
         value=int(monthly_savings_default), 
@@ -311,6 +311,7 @@ else:
 
             doc.build(elements)
             st.download_button("Download PDF", data=buffer.getvalue(), file_name=f"roi_report_{state}_{category}.pdf", mime="application/pdf")
+
 
 
 
