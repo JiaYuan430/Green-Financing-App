@@ -112,8 +112,6 @@ with menu[1]:
             if calculate_bill_from_kwh(kwh) >= target_bill:
                 return kwh
         return max_kwh
-    
-    avg_monthly_consumption = st.number_input("🏠 Average Monthly Electricity Consumption (kWh)", min_value=50, value=400, step=10)
 
     house_types = {
         "Terrace House": {"system_range": (4, 6), "cost_range": (16000, 24000)},
@@ -130,11 +128,34 @@ with menu[1]:
         {"min": 701, "max": 99999, "size": 13.0, "kwh": 1365, "saving": (685, 704)},
     ]
     
-    input_type = st.radio("Choose input type", ["💡 I know my monthly electricity bill (RM)", "🏠 I know my monthly electricity consumption (kWh)"])
+    input_type = st.radio("Choose input type", ["💡 Monthly electricity bill (RM)", "🏠 Monthly electricity consumption (kWh)"])
     
-    if input_type == "💡 I know my monthly electricity bill (RM)":
+    if input_type == "💡 Monthly electricity bill (RM)":
         monthly_bill = st.number_input("Enter your monthly bill (RM)", min_value=10, max_value=2000, value=300)
         monthly_kwh = calculate_kwh_from_bill(monthly_bill)
+        
+        matched = None
+        for row in solar_bill_map:
+            if row["min"] <= monthly_bill <= row["max"]:
+                matched = row
+                break
+
+        if matched:
+            # check the size for house type
+            system_size_kw = matched["size"]
+            if system_size_kw < system_min:
+                system_size_kw = system_min
+            elif system_size_kw > system_max:
+                system_size_kw = system_max
+
+            monthly_savings_default = int(np.mean(matched["saving"]))
+        else:
+            # If not match
+            system_size_kw = (system_min + system_max) / 2
+            monthly_savings_default = int(system_size_kw * 60) 
+
+        st.write(f"🔧 Recommended System Size: {system_size_kw:.1f} kWp ({house_type})")
+    
     else:
         monthly_kwh = st.number_input("Enter your average monthly consumption (kWh)", min_value=50, max_value=2000, value=400)
         monthly_bill = calculate_bill_from_kwh(monthly_kwh)
@@ -160,39 +181,7 @@ with menu[1]:
         house_type = st.selectbox("🏠 House Type", list(house_types.keys()))
         system_min, system_max = house_types[house_type]["system_range"]
 
-        solar_bill_map = [
-            {"min": 170, "max": 230, "size": 4.5, "kwh": 473, "saving": (168, 203)},
-            {"min": 240, "max": 310, "size": 5.5, "kwh": 578, "saving": (239, 281)},
-            {"min": 320, "max": 440, "size": 7.0, "kwh": 735, "saving": (319, 389)},
-            {"min": 450, "max": 570, "size": 9.5, "kwh": 998, "saving": (448, 520)},
-            {"min": 580, "max": 700, "size": 11.5, "kwh": 1208, "saving": (577, 648)},
-            {"min": 710, "max": 9999, "size": 13.0, "kwh": 1365, "saving": (685, 704)},
-        ]
 
-        monthly_bill = st.number_input("💡 Monthly TNB Bill (RM)", min_value=50, value=300, step=10)
-
-        matched = None
-        for row in solar_bill_map:
-            if row["min"] <= monthly_bill <= row["max"]:
-                matched = row
-                break
-
-        if matched:
-            # check the size for house type
-            system_size_kw = matched["size"]
-            if system_size_kw < system_min:
-                system_size_kw = system_min
-            elif system_size_kw > system_max:
-                system_size_kw = system_max
-
-            monthly_savings_default = int(np.mean(matched["saving"]))
-        else:
-            # If not match
-            system_size_kw = (system_min + system_max) / 2
-            monthly_savings_default = int(system_size_kw * 60) 
-
-        st.write(f"🔧 Recommended System Size: {system_size_kw:.1f} kWp ({house_type})")
-    
     elif category == "Water":
         monthly_usage = st.number_input("🚰 Monthly Water Usage (m³)", min_value=5, value=20, step=1)
         efficiency = st.slider("💧 Efficiency Improvement (%)", 1, 50, 20)
@@ -363,6 +352,7 @@ with menu[1]:
 
             doc.build(elements)
             st.download_button("Download PDF", data=buffer.getvalue(), file_name=f"roi_report_{state}_{category}.pdf", mime="application/pdf")
+
 
 
 
