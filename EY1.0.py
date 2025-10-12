@@ -152,35 +152,35 @@ with menu[1]:
 
 # ---------------- AI GREEN ADVISOR ----------------
 with menu[2]:
-    st.title("🤖 AI Green Financing Advisor")
-    st.write("Ask about ROI, ESG, or financing opportunities.")
+client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
-    user_question = st.text_input("💬 Your question:")
-    if st.button("Ask AI"):
-        ql = user_question.lower()
-        if ql.strip() == "":
-            st.write("Please enter a question.")
-        elif "loan" in ql or "finance" in ql:
-            st.write("💬 AI Advisor: GTFS and LCTF offer low-interest green financing for SMEs.")
-        elif "roi" in ql or "payback" in ql:
-            st.write("💬 AI Advisor: Solar ROI typically ranges from 30–80% depending on state irradiation.")
-        elif "esg" in ql:
-            st.write("💬 AI Advisor: ESG adoption improves access to capital and brand reputation.")
-        else:
-            # Fallback to OpenAI GPT for other questions
-            import openai
-            openai.api_key = st.secrets["OPENAI_API_KEY"]
-            try:
-                response = openai.ChatCompletion.create(
-                    model="gpt-4",
-                    messages=[
-                        {"role": "system", "content": "You are a helpful assistant."},
-                        {"role": "user", "content": user_question}
-                    ],
-                    temperature=0.7,
-                    max_tokens=300
-                )
-                answer = response['choices'][0]['message']['content']
-                st.write(f"💬 AI Advisor (GPT): {answer}")
-            except Exception as e:
-                st.error(f"Error contacting AI: {e}")
+st.title("🤖 AI Green Financing Advisor")
+st.write("Ask about ROI, ESG, or financing opportunities.")
+
+user_question = st.text_input("💬 Your question:")
+if st.button("Ask AI"):
+    ql = user_question.lower()
+    if ql.strip() == "":
+        st.write("Please enter a question.")
+    elif "loan" in ql or "finance" in ql:
+        st.write("💬 AI Advisor: GTFS and LCTF offer low-interest green financing for SMEs.")
+    elif "roi" in ql or "payback" in ql:
+        st.write("💬 AI Advisor: Solar ROI typically ranges from 30–80% depending on state irradiation.")
+    elif "esg" in ql:
+        st.write("💬 AI Advisor: ESG adoption improves access to capital and brand reputation.")
+    else:
+        # Call OpenAI GPT (new API)
+        try:
+            response = client.chat.completions.create(
+                model="gpt-4",
+                messages=[
+                    {"role": "system", "content": "You are a helpful assistant."},
+                    {"role": "user", "content": user_question}
+                ],
+                temperature=0.7,
+                max_tokens=300
+            )
+            answer = response.choices[0].message.content
+            st.write(f"💬 AI Advisor (GPT): {answer}")
+        except Exception as e:
+            st.error(f"Error contacting AI: {e}")
