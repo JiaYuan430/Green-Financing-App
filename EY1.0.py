@@ -183,7 +183,7 @@ with menu[2]:
                 else:
                     openai.api_key = api_key
                     response = openai.chat.completions.create(
-                        model="gpt-4",  # or "gpt-3.5-turbo"
+                        model="gpt-3.5-turbo",  # works with all API keys
                         messages=[
                             {"role": "system", "content": "You are a helpful assistant."},
                             {"role": "user", "content": user_question}
