@@ -4,3 +4,4 @@ numpy==1.25.1
 matplotlib
 reportlab
 scikit-learn
+openai
